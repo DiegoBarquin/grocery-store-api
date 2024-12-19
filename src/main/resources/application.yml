@@ -1,0 +1,17 @@
+grocery-store:
+  prices:
+    bread: 1.0
+    vegetable: 1.0
+    beer: 0.5
+  discounts:
+    bread:
+      - { ageInDays: 3, type: "buy-1-take-2", discount: 2, description: "three days old" }
+      - { ageInDays: 6, type: "buy-1-take-3", discount: 3, description: "six days old" }
+    vegetable:
+      - { weightOver: 0, discount: 0.05 }
+      - { weightOver: 100, discount: 0.07 }
+      - { weightOver: 500, discount: 0.10 }
+    beer:
+      - { type: "Belgium", packPrice: 3.0 }
+      - { type: "Dutch", packPrice: 2.0 }
+      - { type: "German", packPrice: 4.0 }
