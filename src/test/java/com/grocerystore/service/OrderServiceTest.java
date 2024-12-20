@@ -42,7 +42,7 @@ public class OrderServiceTest {
 
     @Test
     public void givenOrder_whenCalculateReceipt_thenReturnFormattedReceipt() {
-        String expectedReceipt = "Bread €1,50,   Veg €2,00 per 100g,   Beer €3,00 per bottle\n\n\nTotal: €6,50";
+        String expectedReceipt = "Bread €1,50, Veg €2,00 per 100g, Beer €3,00 per bottle\n\n\n       Total: €6,50";
 
         Map<String, Double> prices = new LinkedHashMap<>();
         prices.put("bread", 1.5);

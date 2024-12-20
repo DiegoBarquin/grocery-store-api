@@ -8,6 +8,7 @@ import com.grocerystore.model.Vegetable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -36,10 +37,7 @@ public class PriceCalculationService {
             double vegetableBasePrice = vegetablePricePer100g * ((double) totalWeight / 100);
             vegetableFinalPrice = vegetableBasePrice - (vegetableBasePrice * discount);
 
-            receipt.append(String.format("%d. %-30s €%3.2f\n",
-                    lineCounter.get(),
-                    String.format("%sg Vegetable", totalWeight),
-                    vegetableFinalPrice));
+            addLineToReceipt(receipt, lineCounter, String.format("%sg Vegetable", totalWeight), vegetableFinalPrice);
 
         }
 
@@ -49,9 +47,14 @@ public class PriceCalculationService {
     public double calculateBeerPrice(Order order, double beerPricePerBottle, StringBuilder receipt, Supplier<Integer> lineCounter) {
         double beerTotalPrice = 0;
 
+        Map<String, Integer> beerQuantityByType = new HashMap<>();
         for (Beer beer : order.getBeers()) {
-            int quantity = beer.quantity();
-            String type = beer.type();
+            beerQuantityByType.merge(beer.type(), beer.quantity(), Integer::sum);
+        }
+
+        for (Map.Entry<String, Integer> entry : beerQuantityByType.entrySet()) {
+            String type = entry.getKey();
+            int quantity = entry.getValue();
 
             Double packPrice = null;
 
@@ -72,10 +75,7 @@ public class PriceCalculationService {
 
             beerTotalPrice += beerFinalPrice;
 
-            receipt.append(String.format("%d. %-30s €%3.2f\n",
-                    lineCounter.get(),
-                    String.format("%s x %s x Beers", quantity, type),
-                    beerFinalPrice));
+            addLineToReceipt(receipt, lineCounter, String.format("%s x %s Beers", quantity, type), beerFinalPrice);
         }
 
         return beerTotalPrice;
@@ -84,9 +84,14 @@ public class PriceCalculationService {
     public double calculateBreadPrice(Order order, double breadPrice, StringBuilder receipt, Supplier<Integer> lineCounter) {
         double breadsTotalPrice = 0;
 
+        Map<Integer, Integer> breadQuantityByAge = new HashMap<>();
         for (Bread bread : order.getBreads()) {
-            int quantity = bread.quantity();
-            int ageInDays = bread.ageInDays();
+            breadQuantityByAge.merge(bread.ageInDays(), bread.quantity(), Integer::sum);
+        }
+
+        for (Map.Entry<Integer, Integer> entry : breadQuantityByAge.entrySet()) {
+            int ageInDays = entry.getKey();
+            int quantity = entry.getValue();
 
             int discount = 1;
             String description = "";
@@ -107,13 +112,18 @@ public class PriceCalculationService {
             }
             breadsTotalPrice += breadFinalPrice;
 
-            receipt.append(String.format("%d. %-30s €%3.2f\n",
-                    lineCounter.get(),
-                    String.format("%s x Bread%s", quantity, description),
-                    breadFinalPrice));
+            addLineToReceipt(receipt, lineCounter, String.format("%s x Bread%s", quantity, description), breadFinalPrice);
         }
 
         return breadsTotalPrice;
+    }
+
+    private void addLineToReceipt(StringBuilder receipt, Supplier<Integer> lineCounter, String description, double price){
+        receipt.append(String.format("%2d.%4s%-30s €%3.2f\n",
+                lineCounter.get(),
+                "",
+                description,
+                price));
     }
 
 }

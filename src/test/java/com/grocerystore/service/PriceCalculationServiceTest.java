@@ -1,6 +1,7 @@
 package com.grocerystore.service;
 
 import com.grocerystore.config.PriceConfig;
+import com.grocerystore.model.Beer;
 import com.grocerystore.model.Bread;
 import com.grocerystore.model.Order;
 import com.grocerystore.model.Vegetable;
@@ -45,22 +46,49 @@ class PriceCalculationServiceTest {
         discountRuleVegetablesOver100.put("weightOver", 100);
         discountRuleVegetablesOver100.put("discount", 0.05);
 
+        Map<String, Object> discountRuleBread3DaysOld = new HashMap<>();
+        discountRuleBread3DaysOld.put("ageInDays", 3);
+        discountRuleBread3DaysOld.put("discount", 2);
+        discountRuleBread3DaysOld.put("description", "three days old");
+        Map<String, Object> discountRuleBread6DaysOld = new HashMap<>();
+        discountRuleBread6DaysOld.put("ageInDays", 6);
+        discountRuleBread6DaysOld.put("discount", 3);
+        discountRuleBread6DaysOld.put("description", "six days old");
+
+        Map<String, Object> discountRuleBelgiumBeer = new HashMap<>();
+        discountRuleBelgiumBeer.put("type", "Belgium");
+        discountRuleBelgiumBeer.put("packPrice", 3.0);
+        Map<String, Object> discountRuleDutchBeer = new HashMap<>();
+        discountRuleDutchBeer.put("type", "Dutch");
+        discountRuleDutchBeer.put("packPrice", 2.0);
+        Map<String, Object> discountRuleGermanBeer = new HashMap<>();
+        discountRuleGermanBeer.put("type", "German");
+        discountRuleGermanBeer.put("packPrice", 4.0);
+
         Map<String, List<Map<String, Object>>> discounts = new HashMap<>();
         discounts.put("vegetable",
                 Arrays.asList(
                         discountRuleVegetablesOver500,
                         discountRuleVegetablesOver300,
                         discountRuleVegetablesOver100));
-
+        discounts.put("bread",
+                Arrays.asList(
+                        discountRuleBread3DaysOld,
+                        discountRuleBread6DaysOld));
+        discounts.put("beer",
+                Arrays.asList(
+                        discountRuleBelgiumBeer,
+                        discountRuleDutchBeer,
+                        discountRuleGermanBeer));
 
         when(priceConfig.getDiscounts()).thenReturn(discounts);
-        when(lineCounter.get()).thenReturn(1);
+        when(lineCounter.get()).thenReturn(1).thenReturn(2);
     }
 
     @Test
-    void givenOrderWithVegetables_whenCalculateVegetablePrice_thenReturnCorrectFinalPrice() {
+    void givenOrderWithVegetables_whenCalculateVegetablePrice_thenReturnCorrectPrice() {
         StringBuilder receipt = new StringBuilder();
-        String expectedReceipt = "1. 400g Vegetable                 €3,80\n";
+        String expectedReceipt = " 1.    400g Vegetable                 €3,80\n";
         double vegetablePricePer100g = 1.0;
         double expectedFinalPrice = 3.8;
 
@@ -116,24 +144,183 @@ class PriceCalculationServiceTest {
     }
 
     @Test
-    void givenOrderWithBread_whenCalculateBreadPrice_thenReturnCorrectFinalPrice() {
+    void givenOrderWithBeerWithDiscounts_whenCalculateBeerPrice_thenReturnCorrectPrice() {
         StringBuilder receipt = new StringBuilder();
+        String expectedReceipt = " 1.    7 x German Beers               €4,50\n";
+
+        double beerPricePerBottle = 0.5;
+        double expectedFinalPrice = 4.5;
+
+        Beer beer = new Beer("German",7);
+        List<Beer> beers = List.of(beer);
+
+        Order order = new Order(
+                List.of(),
+                List.of(),
+                beers);
+
+        double finalPrice = priceCalculationService.calculateBeerPrice(order, beerPricePerBottle, receipt, lineCounter);
+
+        assertEquals(expectedFinalPrice, finalPrice);
+        assertEquals(expectedReceipt, receipt.toString());
+    }
+
+    @Test
+    void givenOrderWithBeerWithNoDiscounts_whenCalculateBeerPrice_thenReturnCorrectPrice() {
+        StringBuilder receipt = new StringBuilder();
+        String expectedReceipt = " 1.    7 x IPA Beers                  €3,50\n";
+
+        double beerPricePerBottle = 0.5;
+        double expectedFinalPrice = 3.5;
+
+        Beer beer = new Beer("IPA",7);
+        List<Beer> beers = List.of(beer);
+
+        Order order = new Order(
+                List.of(),
+                List.of(),
+                beers);
+
+        double finalPrice = priceCalculationService.calculateBeerPrice(order, beerPricePerBottle, receipt, lineCounter);
+
+        assertEquals(expectedFinalPrice, finalPrice);
+        assertEquals(expectedReceipt, receipt.toString());
+    }
+
+    @Test
+    void givenOrderWithMultipleEntriesOfDifferentBeers_whenCalculateBeerPrice_thenReturnCorrectFinalPrice() {
+        StringBuilder receipt = new StringBuilder();
+        String expectedReceipt = " 1.    7 x Belgium Beers              €3,50\n 2.    9 x Dutch Beers                €3,50\n";
+
+        double beerPricePerBottle = 0.5;
+        double expectedPrice = 7;
+
+        Beer belgiumBeer = new Beer("Belgium",7);
+        Beer duchtBeer = new Beer("Dutch",9);
+        List<Beer> beers = List.of(belgiumBeer, duchtBeer);
+
+        Order order = new Order(
+                List.of(),
+                List.of(),
+                beers);
+
+        double finalPrice = priceCalculationService.calculateBeerPrice(order, beerPricePerBottle, receipt, lineCounter);
+
+        assertEquals(expectedPrice, finalPrice);
+        assertEquals(expectedReceipt, receipt.toString());
+    }
+
+    @Test
+    void givenOrderWithMultipleEntriesOfSameBeer_whenCalculateBeerPrice_thenReturnCorrectPrice() {
+        StringBuilder receipt = new StringBuilder();
+        String expectedReceipt = " 1.    6 x German Beers               €4,00\n";
+
+        double beerPricePerBottle = 0.5;
+        double expectedPrice = 4;
+
+        Beer firstBeerEntry = new Beer("German",3);
+        Beer secondBeerEntry = new Beer("German",3);
+        List<Beer> beers = List.of(firstBeerEntry, secondBeerEntry);
+
+        Order order = new Order(
+                List.of(),
+                List.of(),
+                beers);
+
+        double finalPrice = priceCalculationService.calculateBeerPrice(order, beerPricePerBottle, receipt, lineCounter);
+
+        assertEquals(expectedPrice, finalPrice);
+        assertEquals(expectedReceipt, receipt.toString());
+    }
+
+    @Test
+    void givenOrderWithBreadOfOneDay_whenCalculateBreadPrice_thenReturnCorrectPrice() {
+        StringBuilder receipt = new StringBuilder();
+        String expectedReceipt = " 1.    3 x Bread                      €3,00\n";
 
         double breadPrice = 1.0;
-        double expectedFinalPrice = 3.8;
+        double expectedFinalPrice = 3;
 
-        Bread bread = new Bread(3,3);
-        List<Bread> breads = Arrays.asList(bread);
+        Bread bread = new Bread(3,1);
+        List<Bread> breads = List.of(bread);
 
         Order order = new Order(
                 breads,
                 List.of(),
                 List.of());
 
-        double finalPrice = priceCalculationService.calculateBeerPrice(order, breadPrice, receipt, lineCounter);
+        double finalPrice = priceCalculationService.calculateBreadPrice(order, breadPrice, receipt, lineCounter);
 
         assertEquals(expectedFinalPrice, finalPrice);
-        assertTrue(receipt.toString().contains("400g Vegetable €3,80"));
+        assertEquals(expectedReceipt, receipt.toString());
+    }
+
+    @Test
+    void givenOrderWithMultipleEntriesOfSameBreads_whenCalculateBreadPrice_thenReturnCorrectPrice() {
+        StringBuilder receipt = new StringBuilder();
+        String expectedReceipt = " 1.    4 x Bread (three days old)     €2,00\n";
+
+        double breadPrice = 1.0;
+        double expectedFinalPrice = 2;
+
+        Bread firstBreadEntry = new Bread(3,3);
+        Bread secondBreadEntry = new Bread(1,3);
+        List<Bread> breads = List.of(firstBreadEntry, secondBreadEntry);
+
+        Order order = new Order(
+                breads,
+                List.of(),
+                List.of());
+
+        double finalPrice = priceCalculationService.calculateBreadPrice(order, breadPrice, receipt, lineCounter);
+
+        assertEquals(expectedFinalPrice, finalPrice);
+        assertEquals(expectedReceipt, receipt.toString());
+    }
+
+    @Test
+    void givenOrderWithMultipleEntriesOfDifferentBreads_whenCalculateBreadPrice_thenReturnCorrectPrice() {
+        StringBuilder receipt = new StringBuilder();
+        String expectedReceipt = " 1.    3 x Bread (three days old)     €2,00\n 2.    5 x Bread (six days old)       €3,00\n";
+
+        double breadPrice = 1.0;
+        double expectedFinalPrice = 5;
+
+        Bread firstBreadEntry = new Bread(3,3);
+        Bread secondBreadEntry = new Bread(5,6);
+        List<Bread> breads = List.of(firstBreadEntry, secondBreadEntry);
+
+        Order order = new Order(
+                breads,
+                List.of(),
+                List.of());
+
+        double finalPrice = priceCalculationService.calculateBreadPrice(order, breadPrice, receipt, lineCounter);
+
+        assertEquals(expectedFinalPrice, finalPrice);
+        assertEquals(expectedReceipt, receipt.toString());
+    }
+
+    @Test
+    void givenOrderWithBreadOfTreeDays_whenCalculateBreadPrice_thenReturnCorrectPrice() {
+        StringBuilder receipt = new StringBuilder();
+        String expectedReceipt = " 1.    3 x Bread (three days old)     €2,00\n";
+
+        double breadPrice = 1.0;
+        double expectedFinalPrice = 2;
+
+        Bread bread = new Bread(3,3);
+        List<Bread> breads = List.of(bread);
+
+        Order order = new Order(
+                breads,
+                List.of(),
+                List.of());
+
+        double finalPrice = priceCalculationService.calculateBreadPrice(order, breadPrice, receipt, lineCounter);
+
+        assertEquals(expectedFinalPrice, finalPrice);
+        assertEquals(expectedReceipt, receipt.toString());
     }
 
     @Test

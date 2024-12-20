@@ -26,8 +26,8 @@ public class OrderService {
 
         prices.forEach((product, price) -> {
             switch (product) {
-                case "bread" -> receipt.append(String.format("Bread €%.2f,   ", price));
-                case "vegetable" -> receipt.append(String.format("Veg €%.2f per 100g,   ", price));
+                case "bread" -> receipt.append(String.format("Bread €%.2f, ", price));
+                case "vegetable" -> receipt.append(String.format("Veg €%.2f per 100g, ", price));
                 case "beer" -> receipt.append(String.format("Beer €%.2f per bottle", price));
             }
         });
@@ -38,7 +38,7 @@ public class OrderService {
                 .mapToDouble(entry -> calculateProductPrice(order, entry.getKey(), entry.getValue(), receipt))
                 .sum();
 
-        receipt.append(String.format("\nTotal: €%.2f", total));
+        receipt.append(String.format("\n%7sTotal: €%.2f", "", total));
 
         return receipt.toString();
     }
