@@ -1,13 +1,11 @@
-package com.grocerystore.services;
+package com.grocerystore.service;
 
-import com.grocerystore.models.Bread;
-import com.grocerystore.models.Order;
-import com.grocerystore.models.Vegetable;
-import com.grocerystore.services.PriceCalculationService;
 import com.grocerystore.config.PriceConfig;
+import com.grocerystore.model.Bread;
+import com.grocerystore.model.Order;
+import com.grocerystore.model.Vegetable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Nested;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -16,16 +14,19 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
-import static org.mockito.Mockito.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.aot.hint.TypeReference.listOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 class PriceCalculationServiceTest {
-/*
+
     @Mock
     private PriceConfig priceConfig;
+
+    @Mock
+    private Supplier<Integer> lineCounter;
 
     @InjectMocks
     private PriceCalculationService priceCalculationService;
@@ -53,12 +54,13 @@ class PriceCalculationServiceTest {
 
 
         when(priceConfig.getDiscounts()).thenReturn(discounts);
+        when(lineCounter.get()).thenReturn(1);
     }
 
     @Test
     void givenOrderWithVegetables_whenCalculateVegetablePrice_thenReturnCorrectFinalPrice() {
         StringBuilder receipt = new StringBuilder();
-
+        String expectedReceipt = "1. 400g Vegetable                 €3,80\n";
         double vegetablePricePer100g = 1.0;
         double expectedFinalPrice = 3.8;
 
@@ -71,10 +73,10 @@ class PriceCalculationServiceTest {
                 vegetables,
                 List.of());
 
-        double finalPrice = priceCalculationService.calculateVegetablePrice(order, vegetablePricePer100g, receipt);
+        double finalPrice = priceCalculationService.calculateVegetablePrice(order, vegetablePricePer100g, receipt, lineCounter);
 
         assertEquals(expectedFinalPrice, finalPrice);
-        assertTrue(receipt.toString().contains("400g Vegetable €3,80"));
+        assertEquals(expectedReceipt, receipt.toString());
     }
 
     @Test
@@ -89,7 +91,7 @@ class PriceCalculationServiceTest {
                 List.of()
         );
 
-        double finalPrice = priceCalculationService.calculateVegetablePrice(order, vegetablePricePer100g, receipt);
+        double finalPrice = priceCalculationService.calculateVegetablePrice(order, vegetablePricePer100g, receipt, lineCounter);
 
         assertEquals(0.0, finalPrice);
         assertTrue(receipt.toString().isEmpty());
@@ -107,7 +109,7 @@ class PriceCalculationServiceTest {
                 List.of()
         );
 
-        double finalPrice = priceCalculationService.calculateBeerPrice(order, beerPricePerBottle, receipt);
+        double finalPrice = priceCalculationService.calculateBeerPrice(order, beerPricePerBottle, receipt, lineCounter);
 
         assertEquals(0.0, finalPrice);
         assertTrue(receipt.toString().isEmpty());
@@ -117,7 +119,7 @@ class PriceCalculationServiceTest {
     void givenOrderWithBread_whenCalculateBreadPrice_thenReturnCorrectFinalPrice() {
         StringBuilder receipt = new StringBuilder();
 
-        double vegetablePricePer100g = 1.0;
+        double breadPrice = 1.0;
         double expectedFinalPrice = 3.8;
 
         Bread bread = new Bread(3,3);
@@ -128,7 +130,7 @@ class PriceCalculationServiceTest {
                 List.of(),
                 List.of());
 
-        double finalPrice = priceCalculationService.calculateVegetablePrice(order, vegetablePricePer100g, receipt);
+        double finalPrice = priceCalculationService.calculateBeerPrice(order, breadPrice, receipt, lineCounter);
 
         assertEquals(expectedFinalPrice, finalPrice);
         assertTrue(receipt.toString().contains("400g Vegetable €3,80"));
@@ -146,10 +148,10 @@ class PriceCalculationServiceTest {
                 List.of()
         );
 
-        double finalPrice = priceCalculationService.calculateBreadPrice(order, breadPrice, receipt);
+        double finalPrice = priceCalculationService.calculateBreadPrice(order, breadPrice, receipt, lineCounter);
 
         assertEquals(0.0, finalPrice);
         assertTrue(receipt.toString().isEmpty());
     }
-*/
+
 }

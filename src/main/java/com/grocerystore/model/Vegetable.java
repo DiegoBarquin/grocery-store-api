@@ -1,3 +1,11 @@
-package com.grocerystore.models;
+package com.grocerystore.model;
 
-public record Vegetable(String name, double weightInGrams) {}
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+public record Vegetable(
+        String name,
+        @NotNull(message = "Vegetables quantity cannot be null")
+        @Positive(message = "Vegetables quantity must be positive")
+        double weightInGrams
+) {}

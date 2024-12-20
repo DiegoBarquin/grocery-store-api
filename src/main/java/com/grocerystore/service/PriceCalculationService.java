@@ -1,10 +1,10 @@
-package com.grocerystore.services;
+package com.grocerystore.service;
 
 import com.grocerystore.config.PriceConfig;
-import com.grocerystore.models.Beer;
-import com.grocerystore.models.Bread;
-import com.grocerystore.models.Order;
-import com.grocerystore.models.Vegetable;
+import com.grocerystore.model.Beer;
+import com.grocerystore.model.Bread;
+import com.grocerystore.model.Order;
+import com.grocerystore.model.Vegetable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,23 +25,24 @@ public class PriceCalculationService {
             totalWeight += (int) veg.weightInGrams();
         }
         
-        if(totalWeight > 0){
+        if(totalWeight > 0) {
             double discount = 0;
             for (Map<String, Object> rule : priceConfig.getDiscounts().get("vegetable")) {
-                if (totalWeight > (int) rule.get("weightOver")){
+                if (totalWeight > (int) rule.get("weightOver")) {
                     discount = (double) rule.get("discount");
                 }
             }
 
-            double vegetableBasePrice  =  vegetablePricePer100g * ((double) totalWeight /100);
-            vegetableFinalPrice = vegetableBasePrice - ( vegetableBasePrice  * discount);
+            double vegetableBasePrice = vegetablePricePer100g * ((double) totalWeight / 100);
+            vegetableFinalPrice = vegetableBasePrice - (vegetableBasePrice * discount);
 
-            receipt.append(String.format("%d. %-30s %3.2f€\n",
+            receipt.append(String.format("%d. %-30s €%3.2f\n",
                     lineCounter.get(),
-                    String.format("%s g Vegetable", totalWeight),
+                    String.format("%sg Vegetable", totalWeight),
                     vegetableFinalPrice));
+
         }
-        
+
         return vegetableFinalPrice;
     }
 
@@ -52,37 +53,29 @@ public class PriceCalculationService {
             int quantity = beer.quantity();
             String type = beer.type();
 
-            if (type == null || type.isEmpty()) {
-                throw new IllegalArgumentException("Beer name cannot be null or empty.");
+            Double packPrice = null;
+
+            for (Map<String, Object> rule : priceConfig.getDiscounts().get("beer")) {
+                if (rule.get("type").equals(type)){
+                    packPrice = (double) rule.get("packPrice");
+                    break;
+                }
+            }
+            double beerFinalPrice;
+            if (quantity >= 6 && packPrice != null) {
+                int packs = quantity / 6;
+                int extraBeer = quantity % 6;
+                beerFinalPrice = (extraBeer * beerPricePerBottle) + (packs * packPrice);
+            } else {
+                beerFinalPrice = quantity * beerPricePerBottle;
             }
 
-            if (quantity < 0) {
-                throw new IllegalArgumentException("Quantity must be non-negative.");
-            } else{
-                Double packPrice = null;
+            beerTotalPrice += beerFinalPrice;
 
-                for (Map<String, Object> rule : priceConfig.getDiscounts().get("beer")) {
-                    if (rule.get("type").equals(type)){
-                        packPrice = (double) rule.get("packPrice");
-                        break;
-                    }
-                }
-                double beerFinalPrice = 0;
-                if (quantity >= 6 && packPrice != null) {
-                    int packs = quantity / 6;
-                    int extraBeer = quantity % 6;
-                    beerFinalPrice = (extraBeer * beerPricePerBottle) + (packs * packPrice);
-                } else {
-                    beerFinalPrice = quantity * beerPricePerBottle;
-                }
-
-                beerTotalPrice += beerFinalPrice;
-
-                receipt.append(String.format("%d. %-30s %3.2f€\n",
-                        lineCounter.get(),
-                        String.format("%s x %s x Beers", quantity, type),
-                        beerFinalPrice));
-            }
+            receipt.append(String.format("%d. %-30s €%3.2f\n",
+                    lineCounter.get(),
+                    String.format("%s x %s x Beers", quantity, type),
+                    beerFinalPrice));
         }
 
         return beerTotalPrice;
@@ -98,33 +91,26 @@ public class PriceCalculationService {
             int discount = 1;
             String description = "";
 
-            if (quantity < 0) {
-                throw new IllegalArgumentException("Quantity must be non-negative.");
-            }else {
-                double breadFinalPrice = 0;
+            double breadFinalPrice;
 
-                if(ageInDays > 6){
-                    throw new IllegalArgumentException("Bread too old to sell");
-                }else if(ageInDays <= 1){
-                    breadFinalPrice = breadPrice * quantity;
-                    breadsTotalPrice += breadFinalPrice;
-                }else{
-                    for (Map<String, Object> rule : priceConfig.getDiscounts().get("bread")) {
-                        if ( rule.get("ageInDays").equals(ageInDays)) {
-                            discount = (int) rule.get("discount");
-                            description = " ("+ rule.get("description") +")";
-                        }
+            if(ageInDays <= 1){
+                breadFinalPrice = breadPrice * quantity;
+            }else{
+                for (Map<String, Object> rule : priceConfig.getDiscounts().get("bread")) {
+                    if ( rule.get("ageInDays").equals(ageInDays)) {
+                        discount = (int) rule.get("discount");
+                        description = " ("+ rule.get("description") +")";
                     }
-
-                    breadFinalPrice = (breadPrice * (quantity / discount)) + (breadPrice * (quantity % discount));
-                    breadsTotalPrice += breadFinalPrice;
                 }
 
-                receipt.append(String.format("%d. %-30s %3.2f€\n",
-                        lineCounter.get(),
-                        String.format("%s x Bread%s", quantity, description),
-                        breadFinalPrice));
+                breadFinalPrice = (breadPrice * (quantity / discount)) + (breadPrice * (quantity % discount));
             }
+            breadsTotalPrice += breadFinalPrice;
+
+            receipt.append(String.format("%d. %-30s €%3.2f\n",
+                    lineCounter.get(),
+                    String.format("%s x Bread%s", quantity, description),
+                    breadFinalPrice));
         }
 
         return breadsTotalPrice;

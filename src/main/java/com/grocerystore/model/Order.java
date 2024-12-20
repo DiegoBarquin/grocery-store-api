@@ -1,14 +1,20 @@
-package com.grocerystore.models;
+package com.grocerystore.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
 public class Order {
 
+    @Valid
     private List<Bread> breads;
+
+    @Valid
     private List<Vegetable> vegetables;
+
+    @Valid
     private List<Beer> beers;
 
     @JsonCreator

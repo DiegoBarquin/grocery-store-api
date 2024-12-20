@@ -1,7 +1,7 @@
-package com.grocerystore.services;
+package com.grocerystore.service;
 
 import com.grocerystore.config.PriceConfig;
-import com.grocerystore.models.Order;
+import com.grocerystore.model.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,27 +26,24 @@ public class OrderService {
 
         prices.forEach((product, price) -> {
             switch (product) {
-                case "vegetable" -> receipt.append(String.format("Veg €%.2f per 100g,   ", price));
                 case "bread" -> receipt.append(String.format("Bread €%.2f,   ", price));
+                case "vegetable" -> receipt.append(String.format("Veg €%.2f per 100g,   ", price));
                 case "beer" -> receipt.append(String.format("Beer €%.2f per bottle", price));
             }
         });
 
         receipt.append("\n\n");
 
-        double total = 0;
-        for (String product : prices.keySet()) {
-            total += calculateProductPrice(order, product, receipt);
-        }
+        double total = prices.entrySet().stream()
+                .mapToDouble(entry -> calculateProductPrice(order, entry.getKey(), entry.getValue(), receipt))
+                .sum();
 
         receipt.append(String.format("\nTotal: €%.2f", total));
 
         return receipt.toString();
     }
 
-    private double calculateProductPrice(Order order, String product, StringBuilder receipt) {
-        double price = priceConfig.getPrices().get(product);
-
+    private double calculateProductPrice(Order order, String product,double price, StringBuilder receipt) {
         return switch (product) {
             case "bread" -> priceCalculationService.calculateBreadPrice(order, price, receipt, this::incrementCounter);
             case "vegetable" -> priceCalculationService.calculateVegetablePrice(order, price, receipt, this::incrementCounter);
