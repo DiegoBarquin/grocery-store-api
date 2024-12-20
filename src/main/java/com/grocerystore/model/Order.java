@@ -52,4 +52,15 @@ public class Order {
         this.beers = beers;
     }
 
+    public boolean containsBread() {
+        return breads != null && !breads.isEmpty();
+    }
+
+    public boolean containsVegetable() {
+        return vegetables != null && !vegetables.isEmpty();
+    }
+
+    public boolean containsBeer() {
+        return beers != null && !beers.isEmpty();
+    }
 }

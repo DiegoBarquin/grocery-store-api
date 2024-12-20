@@ -1,13 +1,17 @@
 package com.grocerystore.service;
 
 import com.grocerystore.config.PriceConfig;
+import com.grocerystore.model.Beer;
+import com.grocerystore.model.Bread;
 import com.grocerystore.model.Order;
+import com.grocerystore.model.Vegetable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,10 +37,17 @@ public class OrderServiceTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
 
+        Bread bread = new Bread(3,1);
+        List<Bread> breads = List.of(bread);
+        Vegetable vegetable = new Vegetable("Tomato", 200);
+        List<Vegetable> vegetables = List.of(vegetable);
+        Beer beer = new Beer("IPA",7);
+        List<Beer> beers = List.of(beer);
+
         order = new Order(
-                List.of(),
-                List.of(),
-                List.of()
+                breads,
+                vegetables,
+                beers
         );
     }
 

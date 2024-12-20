@@ -6,7 +6,7 @@ This is an example project developed using **Java 21** and **Maven** as the depe
 
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [Start project](#start-project)
+- [Maven Commands](#maven-commands)
 - [Swagger UI](#swagger-ui)
 
 ## Prerequisites
@@ -24,14 +24,38 @@ Before you begin, ensure you have the following installed:
    ```bash
    git clone https://github.com/your-username/your-repository.git
    ```
-   
-## Start project
+## Maven Commands
+
+1. **Move to the root folder of the project**:
+
+   Before running any other commands in a terminal (such as starting the application or running tests),
+you must first navigate to the root folder of the project.
+In the case where you want to go up two levels from your current directory, you would use the following command:
 
    ```bash
-   mvn spring-boot:run 
-   cd ../..
+   cd ../.. 
    ```
-This will start the application, and it should be available at http://localhost:8080 by default.
+
+2. **Confirming Your Location:**:
+   ```bash
+   pwd
+   ```
+   This command will display the path of your current working directory. 
+If the output shows the root directory of your project, you're ready to proceed with further commands.
+
+
+3. **Run unit tests with Maven**:
+
+   This will launch the unit test in local.
+   ```bash
+   mvn test 
+   ```
+4. **Start project**:
+
+   This will start the application, and it should be available at http://localhost:8080 by default.
+   ```bash
+   mvn spring-boot:run 
+   ```
 
 ## Swagger UI
 This project includes Swagger UI for easy testing and documentation of the API.

@@ -35,6 +35,12 @@ public class OrderService {
         receipt.append("\n\n");
 
         double total = prices.entrySet().stream()
+                .filter(entry -> switch (entry.getKey()) {
+                    case "bread" -> order.containsBread();
+                    case "vegetable" -> order.containsVegetable();
+                    case "beer" -> order.containsBeer();
+                    default -> false;
+                })
                 .mapToDouble(entry -> calculateProductPrice(order, entry.getKey(), entry.getValue(), receipt))
                 .sum();
 
