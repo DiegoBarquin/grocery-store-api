@@ -1,11 +1,11 @@
-# Java 21 Project with Maven
+# Grocery Store
 
 This is an example project developed using **Java 21** and **Maven** as the dependency management and build tool. Below are instructions for setting up, running this project.
 
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
-- [Installation](#installation)
+- [Clone the repository](#clone-the-repository)
 - [Maven Commands](#maven-commands)
 - [Swagger UI](#swagger-ui)
 
@@ -17,13 +17,19 @@ Before you begin, ensure you have the following installed:
 - [Maven](https://maven.apache.org/install.html) (recommended for managing dependencies and building the project).
 - [Git](https://git-scm.com/) (required for cloning the repository).
 
-## Installation
+## Clone the repository
 
-1. **Clone the repository**:
-
+1. Open your terminal or command line interface.
+2. Navigate to the location where you want to store the project on your machine.
+3. Run the following command to clone the repository:
    ```bash
-   git clone https://github.com/your-username/your-repository.git
+   git clone https://github.com/DiegoBarquin/grocery-store-api.git
    ```
+4. Navigate into the project directory:
+   ```bash
+   cd grocery-store-api
+   ```
+
 ## Maven Commands
 
 1. **Move to the root folder of the project**:
