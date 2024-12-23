@@ -32,7 +32,7 @@ Before you begin, ensure you have the following installed:
 
 ## Maven Commands
 
-1. **Move to the root folder of the project**:
+- **Move to the root folder of the project**:
 
    Before running any other commands in a terminal (such as starting the application or running tests),
 you must first navigate to the root folder of the project.
@@ -42,7 +42,7 @@ In the case where you want to go up two levels from your current directory, you 
    cd ../.. 
    ```
 
-2. **Confirming Your Location:**:
+- **Confirming Your Location:**:
    ```bash
    pwd
    ```
@@ -50,13 +50,13 @@ In the case where you want to go up two levels from your current directory, you 
 If the output shows the root directory of your project, you're ready to proceed with further commands.
 
 
-3. **Run unit tests with Maven**:
+- **Run unit tests with Maven**:
 
    This will launch the unit test in local.
    ```bash
    mvn test 
    ```
-4. **Start project**:
+- **Start project**:
 
    This will start the application, and it should be available at http://localhost:8080 by default.
    ```bash
