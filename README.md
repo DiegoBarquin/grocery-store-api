@@ -66,4 +66,4 @@ If the output shows the root directory of your project, you're ready to proceed 
 ## Swagger UI
 This project includes Swagger UI for easy testing and documentation of the API.
 Once the application is running, open your browser and navigate to:
-http://localhost:8080/swagger-ui/
+http://localhost:8080/swagger-ui/index.html
